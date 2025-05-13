@@ -1,4 +1,4 @@
-# Trabajo Practico de MicroServices - products-ms
+# Trabajo Practico de MicroServices - client-gateway
 
 ## Este trabajo se hizo con lo enseñado en clase y siguiendo el curso de microservicios de Fernando Herrera
 
