@@ -11,6 +11,7 @@ interface EnvVars {
     ORDER_MS_PORT: number;
     AUTH_MS_HOST: string;
     AUTH_MS_PORT: number;
+    TOKEN: string;
 }
 
 
@@ -21,7 +22,8 @@ const envsSchema = joi.object({
     ORDER_MS_HOST: joi.string().required(),
     ORDER_MS_PORT: joi.number().required(),
     AUTH_MS_HOST: joi.string().required(),
-    AUTH_MS_PORT: joi.number().required()
+    AUTH_MS_PORT: joi.number().required(),
+    TOKEN: joi.string().required()
 })
 .unknown(true);
 
@@ -41,5 +43,6 @@ export const envs = {
     order_ms_host: envVars.ORDER_MS_HOST,
     order_ms_port: envVars.ORDER_MS_PORT,
     auth_ms_host: envVars.AUTH_MS_HOST,
-    auth_ms_port: envVars.AUTH_MS_PORT
+    auth_ms_port: envVars.AUTH_MS_PORT,
+    token: envVars.TOKEN
 }
