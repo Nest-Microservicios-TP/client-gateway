@@ -8,8 +8,6 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { AuthRolGuard } from 'src/auth/guards/auth_rol.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-user-cart.dto';
 
 @Controller('products')
 @UseGuards(AuthGuard, AuthRolGuard)
@@ -63,26 +61,5 @@ export class ProductsController {
       )
   }
 
-
-  //Crear carrito desde el product-ms
-  @Post('create-cart')
-  @Roles('superadmin', 'client')
-  createCartMS(@Body() createCartDto: CreateCartDto) {
-    return this.ProductClient.send({ cmd: 'create_cart' }, createCartDto).pipe(
-      catchError(err => { throw new RpcException(err) })
-    )
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
 }

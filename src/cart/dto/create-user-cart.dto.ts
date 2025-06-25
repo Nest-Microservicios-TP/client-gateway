@@ -1,14 +1,12 @@
 import { Type } from "class-transformer"
-import { IsNumber, IsPositive } from "class-validator"
+import { IsNumber, IsOptional, IsPositive } from "class-validator"
 
-
-
-export class CreateCartDto {
-
+export class CreateUserCartDto {
     @IsNumber()
     @IsPositive()
+    @IsOptional()
     @Type(() => Number)
-    idUser: number
+    idUser?: number
 
 
     @IsNumber()

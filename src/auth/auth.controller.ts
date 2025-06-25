@@ -17,8 +17,6 @@ import { LoginDto } from './dto/login-dto';
 import { AuthGuard } from './guards/auth.guard';
 import { AuthRolGuard } from './guards/auth_rol.guard';
 import { Roles } from './decorators/roles.decorator';
-import { CreateCartDto } from 'src/products/dto/create-cart.dto';
-import { UpdateCartDto } from 'src/products/dto/update-user-cart.dto';
 
 @Controller('auth')
 export class AuthController {

@@ -1,21 +1,26 @@
-import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { CreateCartDto } from 'src/products/dto/create-cart.dto';
-import { UpdateCartDto } from 'src/products/dto/update-user-cart.dto';
+import { CreateUserCartDto } from './dto/create-user-cart.dto';
+import { PRODUCT_SERVICE } from 'src/config';
+import { UpdateUserCartDto } from './dto/update-user-cart.dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { AuthRolGuard } from 'src/auth/guards/auth_rol.guard';
+import { RequestWithUser } from 'src/common';
 
-@Controller('cart')
+@Controller('carts')
+@UseGuards(AuthGuard, AuthRolGuard)
 export class CartController {
   constructor(
-    @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy
+    @Inject(PRODUCT_SERVICE) private readonly ProductClient: ClientProxy
   ) { }
 
-  //Logica de carrito desde el auth-ms
   @Post()
-  @Roles('superadmin')
-  createCart(@Body() createCartDto: CreateCartDto) {
-    return this.authClient.send({ cmd: 'createUserCart' }, createCartDto).pipe(
+  @Roles('superadmin', 'client')
+  createCart(@Body() createUserCartDto: CreateUserCartDto, @Req() req: RequestWithUser) {
+    createUserCartDto.idUser = req.user.id;
+    return this.ProductClient.send({cmd: 'createUserCart'}, createUserCartDto).pipe(
       catchError(err => { throw new RpcException(err) })
     )
   }
@@ -23,15 +28,24 @@ export class CartController {
   @Get()
   @Roles('superadmin', 'client')
   findAllCarts() {
-    return this.authClient.send({ cmd: 'findAllUserCart' }, {}).pipe(
+    return this.ProductClient.send({ cmd: 'findAllUserCart' }, {}).pipe(
       catchError(err => { throw new RpcException(err) })
     )
+  }
+
+  @Get('userCarts/:id')
+  @Roles('superadmin', 'client')
+  findAllCartsByUser(@Param('id', ParseIntPipe) id: number) {
+    return this.ProductClient.send({ cmd: 'findAllUserCartByUser' }, { id })
+      .pipe(
+        catchError(err => { throw new RpcException(err) })
+      )
   }
 
   @Get(':id')
   @Roles('superadmin', 'client')
   findOneCart(@Param('id', ParseIntPipe) id: number) {
-    return this.authClient.send({ cmd: 'findOneUserCart' }, { id })
+    return this.ProductClient.send({ cmd: 'findOneUserCart' }, { id })
       .pipe(
         catchError(err => { throw new RpcException(err) })
       )
@@ -41,8 +55,8 @@ export class CartController {
   @Roles('superadmin')
   updateCart(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateCartDto: UpdateCartDto) {
-    return this.authClient.send({ cmd: 'updateUserCart' }, { id, ...updateCartDto })
+    @Body() updateUserCartDto: UpdateUserCartDto) {
+    return this.ProductClient.send({ cmd: 'updateUserCart' }, { id, ...updateUserCartDto })
       .pipe(
         catchError(err => { throw new RpcException(err) })
       )
@@ -50,10 +64,21 @@ export class CartController {
 
   @Delete(':id')
   @Roles('superadmin')
-  deleteCart(@Param('id') id: string) {
-    return this.authClient.send({ cmd: 'removeUserCart' }, { id })
+  deleteCart( @Param('id', ParseIntPipe) id: number) {
+    return this.ProductClient.send({ cmd: 'removeUserCart' }, { id })
+      .pipe(
+        catchError(err => { throw new RpcException(err) })
+      )
+  }
+
+  @Post('buyCart/:id')
+  @Roles('superadmin', 'client')
+  buyCart( @Param('id', ParseIntPipe) id: number) {
+    return this.ProductClient.send({ cmd: 'buyUserCart' }, { id })
       .pipe(
         catchError(err => { throw new RpcException(err) })
       )
   }
 }
+
+
