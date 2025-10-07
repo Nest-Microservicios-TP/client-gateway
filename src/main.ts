@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { envs } from './config';
 import { RpcCustomExceptionFilter } from './common';
+import { SwaggerModule, DocumentBuilder} from '@nestjs/swagger'
 
 async function bootstrap() {
 
@@ -17,6 +18,16 @@ async function bootstrap() {
   app.setGlobalPrefix('api')
 
   app.useGlobalFilters(new RpcCustomExceptionFilter())
+
+  const config = new DocumentBuilder()
+  .setTitle('ProductsMS - ClientGateway')
+  .setDescription('Shows all the endpoints for the user')
+  .setVersion('1.0')
+  .addTag('products')
+  .build()
+
+  const documentFactory = () => SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('api', app, documentFactory)
 
   await app.listen(envs.port);
 
