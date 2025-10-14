@@ -88,34 +88,36 @@ export class OrdersController {
     );
   }
 
-  @Get(':id/status')
+   @Get('user/:id')
   @ApiOperation({
-    summary: 'Change order status',
-    description:
-      'Changes the status of an existing order by its ID (e.g., pending → completed).',
+    summary: 'Get one order by ID',
+    description: 'Fetches the details of a specific order using its ID.',
   })
   @ApiParam({
     name: 'id',
     type: String,
-    description: 'The unique identifier of the order to update.',
+    description: 'The unique identifier of the order',
   })
   @ApiResponse({
     status: 200,
-    description: 'Order status changed successfully.',
+    description: 'Order found and returned successfully.',
   })
   @ApiResponse({
-    status: 403,
-    description: 'Unauthorized access.',
-  })
+      status: 403,
+      description: 'Unauthorized access.',
+    })
   @ApiResponse({
     status: 404,
     description: 'Order not found.',
   })
-  changeOrderStatus(@Param('id') id: string) {
-    return this.orderClient.send({ cmd: 'changeOrderStatus' }, { id }).pipe(
+  findOneByUser(@Param('userId') userId: number) {
+    return this.orderClient.send({ cmd: 'findOneOrderByUser' }, { userId }).pipe(
       catchError((err) => {
         throw new RpcException(err);
       }),
     );
   }
+
+ 
+  
 }

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { catchError } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { PRODUCT_SERVICE } from 'src/config';
@@ -98,7 +98,7 @@ export class CartController {
   @Roles('superadmin', 'client')
   @ApiOperation({
     summary: 'Get a single cart by ID',
-    description: 'Retrieves a specific cart using its unique identifier.',
+    description: 'Retrieves a specific cart using its ID.',
   })
   @ApiParam({ name: 'id', type: Number, description: 'Cart ID' })
   @ApiResponse({
@@ -198,4 +198,6 @@ export class CartController {
       catchError((err) => { throw new RpcException(err); }),
     );
   }
+
+ 
 }

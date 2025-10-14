@@ -76,4 +76,19 @@ export class AuthController {
     );
   }
 
+
+  //For Testing
+  @ApiResponse({
+    status: 201,
+    description: 'Superadmin created',
+  })
+  @Get('superadmin')
+  async superadmin() {
+    return await firstValueFrom(
+      this.authClient.send({ cmd: 'createSuperAdmin' }, {}).pipe(
+        catchError(err => { throw new RpcException(err) })
+      ),
+    );
+  }
+
 }
