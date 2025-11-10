@@ -8,11 +8,12 @@ import { UpdateUserCartDto } from './dto/update-user-cart.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { AuthRolGuard } from 'src/auth/guards/auth_rol.guard';
 import { RequestWithUser } from 'src/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Carts')
 @Controller('carts')
 @UseGuards(AuthGuard, AuthRolGuard)
+@ApiBearerAuth('access-token')
 export class CartController {
   constructor(
     @Inject(PRODUCT_SERVICE) private readonly ProductClient: ClientProxy
@@ -89,7 +90,19 @@ export class CartController {
     description: 'User not found or no carts available.',
   })
   findAllCartsByUser(@Param('id', ParseIntPipe) id: number) {
+   
     return this.ProductClient.send({ cmd: 'findAllUserCartByUser' }, { id }).pipe(
+      catchError((err) => { throw new RpcException(err); }),
+    );
+  }
+
+  @Get('userCartsToken')
+  @Roles('superadmin', 'client')
+  findAllCartsByUserToken(@Req() req: RequestWithUser,) {
+    const id = req.user.id;
+
+    console.log(req.user.id)
+    return this.ProductClient.send({ cmd: 'findAllUserCartByUserToken' }, { id }).pipe(
       catchError((err) => { throw new RpcException(err); }),
     );
   }
@@ -174,7 +187,7 @@ export class CartController {
     );
   }
 
-  @Post('buyCart/:id')
+  @Get('buyCart/:id')
   @Roles('superadmin', 'client')
   @ApiOperation({
     summary: 'Purchase a cart',

@@ -1,18 +1,34 @@
-import { Controller, Get, Post, Body, Param, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Inject,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ORDER_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import { RequestWithUser } from 'src/common';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { AuthRolGuard } from 'src/auth/guards/auth_rol.guard';
 
-@ApiTags('Orders') 
+@ApiTags('Orders')
 @Controller('orders')
+@UseGuards(AuthGuard, AuthRolGuard)
+@ApiBearerAuth('access-token')
 export class OrdersController {
   constructor(
     @Inject(ORDER_SERVICE) private readonly orderClient: ClientProxy,
   ) {}
 
   @Post()
+  @Roles('superadmin', 'client')
   @ApiOperation({
     summary: 'Create a new order',
     description: 'Creates a new order with the provided data.',
@@ -38,6 +54,7 @@ export class OrdersController {
   }
 
   @Get()
+  @Roles('superadmin')
   @ApiOperation({
     summary: 'Get all orders',
     description: 'Returns a list of all registered orders.',
@@ -59,6 +76,7 @@ export class OrdersController {
   }
 
   @Get(':id')
+  @Roles('superadmin', 'client')
   @ApiOperation({
     summary: 'Get one order by ID',
     description: 'Fetches the details of a specific order using its ID.',
@@ -73,9 +91,9 @@ export class OrdersController {
     description: 'Order found and returned successfully.',
   })
   @ApiResponse({
-      status: 403,
-      description: 'Unauthorized access.',
-    })
+    status: 403,
+    description: 'Unauthorized access.',
+  })
   @ApiResponse({
     status: 404,
     description: 'Order not found.',
@@ -88,36 +106,32 @@ export class OrdersController {
     );
   }
 
-   @Get('user/:id')
+  @Get('user/token')
+  @Roles('superadmin', 'client')
   @ApiOperation({
     summary: 'Get one order by ID',
     description: 'Fetches the details of a specific order using its ID.',
-  })
-  @ApiParam({
-    name: 'id',
-    type: String,
-    description: 'The unique identifier of the order',
   })
   @ApiResponse({
     status: 200,
     description: 'Order found and returned successfully.',
   })
   @ApiResponse({
-      status: 403,
-      description: 'Unauthorized access.',
-    })
+    status: 403,
+    description: 'Unauthorized access.',
+  })
   @ApiResponse({
     status: 404,
     description: 'Order not found.',
   })
-  findOneByUser(@Param('userId') userId: number) {
-    return this.orderClient.send({ cmd: 'findOneOrderByUser' }, { userId }).pipe(
-      catchError((err) => {
-        throw new RpcException(err);
-      }),
-    );
+  findOneByUser(@Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    return this.orderClient
+      .send({ cmd: 'findOneOrderByUser' }, { userId })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
-
- 
-  
 }

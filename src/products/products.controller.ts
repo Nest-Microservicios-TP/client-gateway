@@ -27,11 +27,13 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 @ApiTags('Products')
 @UseGuards(AuthGuard, AuthRolGuard)
-@Controller('products')
+@Controller('Products')
+@ApiBearerAuth('access-token')
 export class ProductsController {
   constructor(
     @Inject(PRODUCT_SERVICE) private readonly ProductClient: ClientProxy,

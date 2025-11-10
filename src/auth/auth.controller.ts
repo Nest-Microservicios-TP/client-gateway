@@ -45,6 +45,7 @@ export class AuthController {
   @UseGuards(AuthGuard, AuthRolGuard)
   @Roles('superadmin')
   @Post('register')
+  @ApiBearerAuth('access-token')
   async register(@Body() registerDto: RegisterDto) {
     return await firstValueFrom(
       this.authClient.send({ cmd: 'registerUser' }, registerDto).pipe(
