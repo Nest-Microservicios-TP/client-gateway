@@ -77,6 +77,18 @@ export class AuthController {
     );
   }
 
+  @UseGuards(AuthGuard, AuthRolGuard)
+  @Roles('superadmin')
+  @ApiBearerAuth('access-token')
+  @Get('users')
+  async getAllUsers() {
+    return await firstValueFrom(
+      this.authClient.send({ cmd: 'findAllUsers' }, {}).pipe(
+        catchError(err => { throw new RpcException(err) })
+      )
+    )
+  }
+
 
   //For Testing
   @ApiResponse({
